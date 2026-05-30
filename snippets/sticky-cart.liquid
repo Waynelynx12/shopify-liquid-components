@@ -1,0 +1,55 @@
+<div class="sticky-cart-drawer" id="sticky-cart">
+  <div class="cart-overlay" onclick="closeCart()"></div>
+  <div class="cart-panel">
+    <div class="cart-header">
+      <h3>Your Cart</h3>
+      <button onclick="closeCart()">✕</button>
+    </div>
+
+    <div class="cart-items">
+      {% for item in cart.items %}
+        <div class="cart-item">
+          <img src="{{ item.image | img_url: '100x100' }}" alt="{{ item.title }}">
+          <div class="cart-item-details">
+            <p class="item-title">{{ item.title }}</p>
+            <p class="item-price">{{ item.price | money }}</p>
+            <div class="item-quantity">
+              <button onclick="updateCart('{{ item.key }}', {{ item.quantity | minus: 1 }})">-</button>
+              <span>{{ item.quantity }}</span>
+              <button onclick="updateCart('{{ item.key }}', {{ item.quantity | plus: 1 }})">+</button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="cart-footer">
+      {% assign free_shipping_threshold = 100 %}
+      {% assign remaining = free_shipping_threshold | minus: cart.total_price | divided_by: 100 %}
+      {% if cart.total_price < free_shipping_threshold | times: 100 %}
+        <div class="shipping-progress">
+          <p>Add ${{ remaining }} more for free shipping</p>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ cart.total_price | divided_by: free_shipping_threshold }}%"></div>
+          </div>
+        </div>
+      {% endif %}
+      <p class="cart-total">Total: {{ cart.total_price | money }}</p>
+      <a href="/checkout" class="checkout-btn">Checkout</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function closeCart() {
+  document.getElementById('sticky-cart').classList.remove('open');
+}
+
+function updateCart(key, quantity) {
+  fetch('/cart/change.js', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: key, quantity: quantity })
+  }).then(() => window.location.reload());
+}
+</script>

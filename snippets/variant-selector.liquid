@@ -1,0 +1,25 @@
+{% assign current_variant = product.selected_or_first_available_variant %}
+
+<div class="variant-selector">
+  {% for option in product.options_with_values %}
+    <div class="option-group">
+      <label class="option-label">{{ option.name }}</label>
+      <div class="option-values">
+        {% for value in option.values %}
+          {% assign variant_available = false %}
+          {% for variant in product.variants %}
+            {% if variant.option1 == value and variant.available %}
+              {% assign variant_available = true %}
+            {% endif %}
+          {% endfor %}
+          <button
+            class="option-btn {% if variant_available == false %}sold-out{% endif %} {% if value == current_variant.option1 %}active{% endif %}"
+            data-value="{{ value }}"
+            data-option="{{ option.name }}">
+            {{ value }}
+          </button>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
